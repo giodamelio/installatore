@@ -1,0 +1,2 @@
+@[{:url "https://github.com/janet-lang/pkgs.git" :tag "6b309a7cdecf35f61f62dffb74feb6efe18d3e85" :type :git}
+  {:url "https://github.com/janet-lang/spork.git" :tag "476739b496f94fe25cd855e009eb49da4f97299f" :type :git}]
