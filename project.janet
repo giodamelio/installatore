@@ -2,7 +2,7 @@
   :name "installatore"
   :description ```Barebones NixOS installer```
   :version "0.0.0"
-  :dependencies ["spork"])
+  :dependencies ["spork" "sh"])
 
 (declare-executable
   :name "installatore"

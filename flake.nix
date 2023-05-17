@@ -37,6 +37,9 @@
           version = "0.0.1";
           src = ./.;
           entry = ./src/init.janet;
+          buildInputs = with nixpkgsFor.${system}; [
+            fzf
+          ];
         };
       });
 
@@ -47,7 +50,7 @@
         with nixpkgsFor.${system};
         mkShell {
           packages = [ janet jpm ];
-          buildInputs = [ janet ];
+          buildInputs = [ janet fzf ];
           shellHook = ''
             # localize jpm dependency paths
             export JANET_PATH="$PWD/.jpm"
