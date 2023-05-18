@@ -3,33 +3,40 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    flake-utils = {
+      url = "github:numtide/flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs  } @ inputs: let
-    lib = nixpkgs.lib;
-    pkgs = nixpkgs.legacyPackages.x86_64-linux;
-  in {
-      packages.x86_64-linux = {
-        installatore = pkgs.stdenv.mkDerivation {
-          name = "installatore";
-          src = ./install.nu;
-          buildInputs = [ pkgs.nushell ];
-          phases = [ "installPhase" ];
-          installPhase = ''
+  outputs = { self, nixpkgs, flake-utils } @ inputs:
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        lib = nixpkgs.lib;
+        pkgs = nixpkgs.legacyPackages.${system};
+      in {
+        packages = {
+          installatore = pkgs.stdenv.mkDerivation {
+            name = "installatore";
+            src = ./install.nu;
+            buildInputs = [ pkgs.nushell ];
+            phases = [ "installPhase" ];
+            installPhase = ''
             mkdir -p "$out/bin"
             cp ${./install.nu} "$out/bin/installatore"
             chmod +x "$out/bin/installatore"
             patchShebangs "$out/bin/installatore"
+            '';
+          };
+        };
+
+        defaultPackage = self.packages.${system}.installatore;
+
+        devShell = pkgs.stdenv.mkShell {
+          buildInputs = [];
+          shellHook = ''
           '';
         };
-      };
-
-      defaultPackage.x86_64-linux = self.packages.x86_64-linux.installatore;
-
-      devShell = pkgs.stdenv.mkShell {
-        buildInputs = [];
-        shellHook = ''
-        '';
-      };
-    };
+      }
+    );
 }
