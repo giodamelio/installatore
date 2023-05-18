@@ -1,6 +1,19 @@
 (use sh)
 (import spork/json)
 
+(defn check-dependencies [deps]
+  "Check if dependencies are installed"
+  (def missing-dependencies (->> deps
+                                 (map |(tuple $ ($? which ,$)))
+                                 (filter (fn [[name exists]] (false? exists)))))
+  (if (zero? (length missing-dependencies))
+    nil
+    (do
+      (print "Missing runtime dependencies:")
+      (each dep missing-dependencies
+        (print "  " (first dep)))
+      (os/exit 1))))
+
 (defn disks []
   "Get information on all the disks in the system"
   (def disks-json ($< lsblk -o "name,serial,size,uuid,path" --json))
@@ -18,5 +31,8 @@
 
 (defn main
   [& args]
+  # Check if dependencies are installed
+  (pp (check-dependencies ["fzf"]))
+
   (def disk (choose-disk))
   (print "You chose: " disk))
