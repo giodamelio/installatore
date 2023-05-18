@@ -15,13 +15,16 @@
           installatore = pkgs.stdenv.mkDerivation {
             name = "installatore";
             src = ./install.nu;
-            buildInputs = [ pkgs.nushell ];
+            buildInputs = [ pkgs.nushell pkgs.skim ];
             phases = [ "installPhase" ];
             installPhase = ''
             mkdir -p "$out/bin"
             cp ${./install.nu} "$out/bin/installatore"
             chmod +x "$out/bin/installatore"
+
+            # Update paths to Nushell and Skim
             patchShebangs "$out/bin/installatore"
+            substituteInPlace "$out/bin/installatore" --replace "sk --delimiter" "${pkgs.skim}/bin/sk --delimiter"
             '';
           };
         };
