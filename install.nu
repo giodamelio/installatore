@@ -1,3 +1,5 @@
+#!/usr/bin/env nu
+
 use std 'log info'
 
 # Check for runtime dependencies

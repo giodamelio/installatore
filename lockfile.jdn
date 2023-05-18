@@ -1,4 +1,0 @@
-@[{:url "https://github.com/andrewchambers/janet-posix-spawn.git" :tag "d73057161a8d10f27b20e69f0c1e2ceb3e145f97" :type :git}
-  {:url "https://github.com/andrewchambers/janet-sh.git" :tag "221bcc869bf998186d3c56a388c8313060bfd730" :type :git}
-  {:url "https://github.com/janet-lang/pkgs.git" :tag "6b309a7cdecf35f61f62dffb74feb6efe18d3e85" :type :git}
-  {:url "https://github.com/janet-lang/spork.git" :tag "476739b496f94fe25cd855e009eb49da4f97299f" :type :git}]
