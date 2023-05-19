@@ -19,7 +19,7 @@ if ($missing | length) > 0 {
   exit 1
 }
 
-# Get info from disks
+# Get info about drives
 let drives = (
   lsblk -o name,serial,size,uuid,path,type --json |
   from json |
