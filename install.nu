@@ -2,8 +2,11 @@
 
 use std 'log info'
 
+# Declare dependencies in one place, so they can be overwritten by Nix
+let sk_bin = "sk"
+
 # Check for runtime dependencies
-let deps = ["sk"]
+let deps = [$sk_bin]
 let missing = (
   $deps |
   each { || [$in, (which $in)] } |
@@ -37,7 +40,7 @@ def choose-drive [] {
       format-drive 
     } |
     to text |
-    sk --delimiter "\t" --preview "lsblk -o name,size,ro,type,mountpoint,label,parttypename {1}" --preview-window up --header "Chose a drive to install on" --select-1 |
+    ^$sk_bin --delimiter "\t" --preview "lsblk -o name,size,ro,type,mountpoint,label,parttypename {1}" --preview-window up --header "Chose a drive to install on" --select-1 |
     split column "\t" path size serial |
     get 0
   )

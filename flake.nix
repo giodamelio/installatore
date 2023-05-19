@@ -24,7 +24,7 @@
 
             # Update paths to Nushell and Skim
             patchShebangs "$out/bin/installatore"
-            substituteInPlace "$out/bin/installatore" --replace "sk --delimiter" "${pkgs.skim}/bin/sk --delimiter"
+            substituteInPlace "$out/bin/installatore" --replace "sk_bin = \"sk\"" "sk_bin = \"${pkgs.skim}/bin/sk\""
             '';
           };
         };
