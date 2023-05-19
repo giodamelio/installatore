@@ -126,6 +126,10 @@ def main [
     let $formatScript = (sudo $disko_bin --dry-run --root-mountpoint $root $partitionLayout --argstr disk $drive --mode zap_create_mount)
     sudo $formatScript
     print "Disk formatted and mounted"
+
+    # Generate other configs
+    sudo nixos-generate-config --no-filesystems --root $root
+    sudo cp $partitionLayout $"($root)/etc/nixos/"
   } catch {
     |e| printf "%sAborting. %s%s\n" (ansi red) $e.msg (ansi reset)
   }
