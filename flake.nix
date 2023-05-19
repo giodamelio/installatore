@@ -14,17 +14,23 @@
         packages = {
           installatore = pkgs.stdenv.mkDerivation {
             name = "installatore";
-            src = ./install.nu;
+            src = ./.;
             buildInputs = [ pkgs.nushell pkgs.skim ];
             phases = [ "installPhase" ];
             installPhase = ''
+            # Copy Templates
+            mkdir -p "$out/usr/share/installatore"
+            cp -r "$src/templates/" "$out/usr/share/installatore"
+
+            # Copy script
             mkdir -p "$out/bin"
-            cp ${./install.nu} "$out/bin/installatore"
+            cp "$src/install.nu" "$out/bin/installatore"
             chmod +x "$out/bin/installatore"
 
             # Update paths to Nushell and Skim
             patchShebangs "$out/bin/installatore"
-            substituteInPlace "$out/bin/installatore" --replace "sk_bin = \"sk\"" "sk_bin = \"${pkgs.skim}/bin/sk\""
+            substituteInPlace "$out/bin/installatore" \
+              --replace 'sk_bin = "sk"' 'sk_bin = "${pkgs.skim}/bin/sk"'
             '';
           };
         };
