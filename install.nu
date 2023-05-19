@@ -19,13 +19,14 @@ if ($missing | length) > 0 {
   exit 1
 }
 
+
 # Get info about drives
-let drives = (
+def drives [] {
   lsblk -o name,serial,size,uuid,path,type --json |
   from json |
   get blockdevices |
   where type == disk
-)
+}
 
 # Select which drive you want to install on
 def choose-drive [] {
@@ -34,7 +35,7 @@ def choose-drive [] {
   }
 
   let drive = (
-    $drives |
+    drives |
     each { ||
       $in |
       format-drive 
@@ -62,7 +63,7 @@ def main [
 
 # Print info on all the drives
 def "main drives" [] {
-  for drive in $drives {
+  for drive in (drives) {
     print $drive.path
     $drive | reject children | print
     print $drive.children
