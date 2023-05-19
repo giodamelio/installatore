@@ -54,7 +54,8 @@ def choose-drive [] {
 def choose-partitions [] {
   let templates = (ls templates/partitions | get name | to text)
   $templates |
-  ^$sk_bin --header "Choose partitions layout" --preview $"($bat_bin) {} --color=always" --preview-window up:80%
+  ^$sk_bin --header "Choose partitions layout" --preview $"($bat_bin) {} --color=always" --preview-window up:80% |
+  str trim
 }
 
 # A barebones NixOS installer
