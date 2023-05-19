@@ -37,7 +37,7 @@ def choose-drive [] {
     printf "%s\t%s\t%s" $in.path $in.size $in.serial
   }
 
-  let drive = (
+  let driveCmd = (
     drives |
     each { ||
       $in |
@@ -45,47 +45,66 @@ def choose-drive [] {
     } |
     to text |
     ^$sk_bin --delimiter "\t" --preview "lsblk -o name,size,ro,type,mountpoint,label,parttypename {1}" --preview-window up --header "Chose a drive to install on" --select-1 |
+    complete
+  )
+
+  if $driveCmd.exit_code == 130 {
+    return (error make {
+      msg: "No drive chosen"
+    })
+  }
+
+  (
+    $driveCmd.stdout |
     split column "\t" path size serial |
     get 0
   )
-
-  $drive
 }
 
 # Select partition layout you want
-def choose-partitions [] {
+def-env choose-partitions [] {
   let templates = (ls $"($templates_path)/partitions" | get name | to text)
-  $templates |
-  ^$sk_bin --header "Choose partitions layout" --preview $"($bat_bin) {} --color=always" --preview-window up:80% --delimiter "/" --with-nth=-1 |
-  str trim
+  let templateCmd = ($templates | ^$sk_bin --header "Choose partitions layout" --preview $"($bat_bin) {} --color=always" --preview-window up:80% --delimiter "/" --with-nth=-1 | complete)
+
+  if $templateCmd.exit_code == 130 {
+    return (error make {
+      msg: "No partition template chosen"
+    })
+  }
+
+  $templateCmd.stdout | str trim
 }
 
 # A barebones NixOS installer
 def main [
   --root: path = "/mnt" # Root location to write configs to
 ] {
-  # Choose a partition format
-  let partitionLayout = (choose-partitions)
-  printf "Using partition layout %s\n" $partitionLayout
+  try {
+    # Choose a partition format
+    let partitionLayout = (choose-partitions)
+    printf "Using partition layout %s\n" $partitionLayout
 
-  # Choose drive to install on
-  let drive = (choose-drive)
-  printf "Using drive %s\n" $drive.path
+    # Choose drive to install on
+    let drive = (choose-drive)
+    printf "Using drive %s\n" $drive.path
 
-  # Create the partitions
-  printf "%sAbout to partition %s\n" (ansi red_bold) $drive.path
-  printf "This will destroy all data on the drive%s\n" (ansi reset)
-  printf "Current partitions on disk:\n"
-  lsblk -o name,ro,mountpoint,label,parttypename $drive.path
-  let continue = (input "Continue [y/N]: ")
-  if $continue != "y" {
-    print "Aborting"
-    exit 0
+    # Create the partitions
+    printf "%sAbout to partition %s\n" (ansi red_bold) $drive.path
+    printf "This will destroy all data on the drive%s\n" (ansi reset)
+    printf "Current partitions on disk:\n"
+    lsblk -o name,ro,mountpoint,label,parttypename $drive.path
+    let continue = (input "Continue [y/N]: ")
+    if $continue != "y" {
+      print "Aborting"
+      exit 0
+    }
+    print "Formatting..."
+    let $formatScript = (sudo $disko_bin --dry-run --root-mountpoint $root $partitionLayout --argstr disk $drive.path --mode zap_create_mount)
+    sudo $formatScript
+    print "Disk formatted and mounted"
+  } catch {
+    |e| printf "%sAborting. %s%s\n" (ansi red) $e.msg (ansi reset)
   }
-  print "Formatting..."
-  let $formatScript = (sudo $disko_bin --dry-run --root-mountpoint $root $partitionLayout --argstr disk $drive.path --mode zap_create_mount)
-  sudo $formatScript
-  print "Disk formatted and mounted"
 }
 
 # Print info on all the drives
