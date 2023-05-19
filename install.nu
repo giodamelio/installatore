@@ -41,7 +41,10 @@ def choose-drive [] {
       format-drive 
     } |
     to text |
-    ^$sk_bin --delimiter "\t" --preview "lsblk -o name,size,ro,type,mountpoint,label,parttypename {1}" --preview-window up --header "Chose a drive to install on" --select-1 |
+    ^$sk_bin --delimiter "\t" \
+      --preview "lsblk -o name,size,ro,type,mountpoint,label,parttypename {1}" \
+      --preview-window up \
+      --header "Chose a drive to install on" --select-1 |
     split column "\t" path size serial |
     get 0
   )
