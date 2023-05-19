@@ -8,7 +8,7 @@ let bat_bin = "bat"
 let disko_bin = "disko"
 
 # Check for runtime dependencies
-let deps = [$sk_bin, $bat_bin]
+let deps = [$sk_bin, $bat_bin, $disko_bin]
 let missing = (
   $deps |
   each { || [$in, (which $in)] } |
@@ -72,7 +72,19 @@ def main [
   printf "Using drive %s\n" $drive.path
 
   # Create the partitions
-  sudo ^$disko_bin --dry-run --root-mountpoint $root --argstr disk $drive.path $partitionLayout
+  printf "%sAbout to partition %s\n" (ansi red_bold) $drive.path
+  printf "This will destroy all data on the drive%s\n" (ansi reset)
+  printf "Current partitions on disk:\n"
+  lsblk -o name,ro,mountpoint,label,parttypename $drive.path
+  let continue = (input "Continue [y/N]: ")
+  if $continue != "y" {
+    print "Aborting"
+    exit 0
+  }
+  print "Formatting..."
+  let $formatScript = (sudo $disko_bin --dry-run --root-mountpoint $root $partitionLayout --argstr disk $drive.path --mode zap_create_mount)
+  sudo $formatScript
+  print "Disk formatted and mounted"
 }
 
 # Print info on all the drives

@@ -1,5 +1,5 @@
 # Simple hybrid layout compatable with both BIOS and UEFI
-{ disk ? "/dev/vda" }: {
+{ disk ? "/dev/vda", ... }: {
   disko.devices = {
     disk = {
       main = {
