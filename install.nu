@@ -82,11 +82,11 @@ def main [
   try {
     # Choose a partition format
     let partitionLayout = (choose-partitions)
-    printf "Using partition layout %s\n" $partitionLayout
+    printf "\nUsing partition layout %s\n" $partitionLayout
 
     # Choose drive to install on
     let drive = (choose-drive)
-    printf "Using drive %s\n" $drive.path
+    printf "\nUsing drive %s\n" $drive.path
 
     # Create the partitions
     printf "%sAbout to partition %s\n" (ansi red_bold) $drive.path
