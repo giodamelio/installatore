@@ -49,7 +49,11 @@ def choose-drive [] {
 }
 
 # A barebones NixOS installer
-def main [] {
+def main [
+  --root: path = "/mnt" # Root location to write configs to
+] {
+  print $root
+
   # Choose drive to install on
   let drive = (choose-drive)
   printf "Using drive %s\n" $drive.path
