@@ -48,6 +48,19 @@ def choose-drive [] {
   $drive
 }
 
-let drive = (choose-drive)
-printf "Using drive %s\n" $drive.path
-print $drive
+# A barebones NixOS installer
+def main [] {
+  # Choose drive to install on
+  let drive = (choose-drive)
+  printf "Using drive %s\n" $drive.path
+  print $drive
+}
+
+# Print info on all the drives
+def "main drives" [] {
+  for drive in $drives {
+    print $drive.path
+    $drive | reject children | print
+    print $drive.children
+  }
+}
