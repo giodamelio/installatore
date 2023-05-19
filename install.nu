@@ -5,6 +5,7 @@ use std 'log info'
 # Declare dependencies in one place, so they can be overwritten by Nix
 let sk_bin = "sk"
 let bat_bin = "bat"
+let disko_bin = "disko"
 
 # Check for runtime dependencies
 let deps = [$sk_bin, $bat_bin]
@@ -69,6 +70,9 @@ def main [
   # Choose drive to install on
   let drive = (choose-drive)
   printf "Using drive %s\n" $drive.path
+
+  # Create the partitions
+  sudo ^$disko_bin --dry-run --root-mountpoint $root --argstr disk $drive.path $partitionLayout
 }
 
 # Print info on all the drives
