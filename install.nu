@@ -32,7 +32,7 @@ def drives [] {
 }
 
 # Select which drive you want to install on
-def choose-drive [] {
+def-env choose-drive [] {
   def format-drive [] {
     printf "%s\t%s\t%s" $in.path $in.size $in.serial
   }
@@ -54,11 +54,34 @@ def choose-drive [] {
     })
   }
 
-  (
+  let drive = (
     $driveCmd.stdout |
-    split column "\t" path size serial |
-    get 0
+    split column "\t" path size serial
   )
+
+  # Try to find a matching symlink by serial id
+  let baseNamedSymlinks = (
+    ls -l /dev/disk/by-id |
+    each { || $in | update target ($in.target | path basename) }
+  )
+  let driveBaseName = ($drive.path | path basename | get 0)
+  let matchingSymlinks = (
+    $baseNamedSymlinks |
+    where target == $driveBaseName |
+    get name
+  )
+  if ($matchingSymlinks | length) > 0 {
+    let newDiskName = (
+      $matchingSymlinks |
+      prepend ($drive.path | get 0) |
+      to text |
+      ^$sk_bin --header "Which name for the disk do you want to use?"
+    )
+
+    return $newDiskName
+  }
+
+  $drive | get 0 | get path
 }
 
 # Select partition layout you want
@@ -86,13 +109,13 @@ def main [
 
     # Choose drive to install on
     let drive = (choose-drive)
-    printf "\nUsing drive %s\n" $drive.path
+    printf "\nUsing drive %s\n" $drive
 
     # Create the partitions
-    printf "%sAbout to partition %s\n" (ansi red_bold) $drive.path
+    printf "%sAbout to partition %s\n" (ansi red_bold) $drive
     printf "This will destroy all data on the drive%s\n" (ansi reset)
     printf "Current partitions on disk:\n"
-    lsblk -o name,ro,mountpoint,label,parttypename $drive.path
+    lsblk -o name,ro,mountpoint,label,parttypename $drive
     let continue = (input "Continue [y/N]: ")
     if $continue != "y" {
       return (error make {
@@ -100,7 +123,7 @@ def main [
       })
     }
     print "Formatting..."
-    let $formatScript = (sudo $disko_bin --dry-run --root-mountpoint $root $partitionLayout --argstr disk $drive.path --mode zap_create_mount)
+    let $formatScript = (sudo $disko_bin --dry-run --root-mountpoint $root $partitionLayout --argstr disk $drive --mode zap_create_mount)
     sudo $formatScript
     print "Disk formatted and mounted"
   } catch {
