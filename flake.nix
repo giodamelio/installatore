@@ -15,7 +15,7 @@
           installatore = pkgs.stdenv.mkDerivation {
             name = "installatore";
             src = ./.;
-            buildInputs = [ pkgs.nushell pkgs.skim ];
+            buildInputs = [ pkgs.nushell pkgs.skim pkgs.bat ];
             phases = [ "installPhase" ];
             installPhase = ''
             # Copy Templates
@@ -30,7 +30,8 @@
             # Update paths to Nushell and Skim
             patchShebangs "$out/bin/installatore"
             substituteInPlace "$out/bin/installatore" \
-              --replace 'sk_bin = "sk"' 'sk_bin = "${pkgs.skim}/bin/sk"'
+              --replace 'sk_bin = "sk"' 'sk_bin = "${pkgs.skim}/bin/sk"' \
+              --replace 'bat_bin = "bat"' 'bat_bin = "${pkgs.bat}/bin/bat"'
             '';
           };
         };

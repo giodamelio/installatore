@@ -4,9 +4,10 @@ use std 'log info'
 
 # Declare dependencies in one place, so they can be overwritten by Nix
 let sk_bin = "sk"
+let bat_bin = "bat"
 
 # Check for runtime dependencies
-let deps = [$sk_bin]
+let deps = [$sk_bin, $bat_bin]
 let missing = (
   $deps |
   each { || [$in, (which $in)] } |
@@ -41,10 +42,7 @@ def choose-drive [] {
       format-drive 
     } |
     to text |
-    ^$sk_bin --delimiter "\t" \
-      --preview "lsblk -o name,size,ro,type,mountpoint,label,parttypename {1}" \
-      --preview-window up \
-      --header "Chose a drive to install on" --select-1 |
+    ^$sk_bin --delimiter "\t" --preview "lsblk -o name,size,ro,type,mountpoint,label,parttypename {1}" --preview-window up --header "Chose a drive to install on" --select-1 |
     split column "\t" path size serial |
     get 0
   )
@@ -52,16 +50,24 @@ def choose-drive [] {
   $drive
 }
 
+# Select partition layout you want
+def choose-partitions [] {
+  let templates = (ls templates/partitions | get name | to text)
+  $templates |
+  ^$sk_bin --header "Choose partitions layout" --preview $"($bat_bin) {} --color=always" --preview-window up:80%
+}
+
 # A barebones NixOS installer
 def main [
   --root: path = "/mnt" # Root location to write configs to
 ] {
-  print $root
+  # Choose a partition format
+  let partitionLayout = (choose-partitions)
+  printf "Using partition layout %s\n" $partitionLayout
 
   # Choose drive to install on
   let drive = (choose-drive)
   printf "Using drive %s\n" $drive.path
-  print $drive
 }
 
 # Print info on all the drives
