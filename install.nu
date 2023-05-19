@@ -95,8 +95,9 @@ def main [
     lsblk -o name,ro,mountpoint,label,parttypename $drive.path
     let continue = (input "Continue [y/N]: ")
     if $continue != "y" {
-      print "Aborting"
-      exit 0
+      return (error make {
+        msg: ""
+      })
     }
     print "Formatting..."
     let $formatScript = (sudo $disko_bin --dry-run --root-mountpoint $root $partitionLayout --argstr disk $drive.path --mode zap_create_mount)
