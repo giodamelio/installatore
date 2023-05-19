@@ -6,6 +6,7 @@ use std 'log info'
 let sk_bin = "sk"
 let bat_bin = "bat"
 let disko_bin = "disko"
+let templates_path = "templates"
 
 # Check for runtime dependencies
 let deps = [$sk_bin, $bat_bin, $disko_bin]
@@ -53,9 +54,9 @@ def choose-drive [] {
 
 # Select partition layout you want
 def choose-partitions [] {
-  let templates = (ls templates/partitions | get name | to text)
+  let templates = (ls $"($templates_path)/partitions" | get name | to text)
   $templates |
-  ^$sk_bin --header "Choose partitions layout" --preview $"($bat_bin) {} --color=always" --preview-window up:80% |
+  ^$sk_bin --header "Choose partitions layout" --preview $"($bat_bin) {} --color=always" --preview-window up:80% --delimiter "/" --with-nth=-1 |
   str trim
 }
 

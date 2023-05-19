@@ -37,7 +37,8 @@
             substituteInPlace "$out/bin/installatore" \
               --replace 'sk_bin = "sk"' 'sk_bin = "${pkgs.skim}/bin/sk"' \
               --replace 'bat_bin = "bat"' 'bat_bin = "${pkgs.bat}/bin/bat"' \
-              --replace 'disko_bin = "disko"' 'disko_bin = "${disko}/disko"'
+              --replace 'disko_bin = "disko"' 'disko_bin = "${disko}/disko"' \
+              --replace 'templates_path = "templates"' "templates_path = \"$out/usr/share/installatore/templates\""
             '';
           };
         };
